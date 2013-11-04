@@ -64,10 +64,6 @@ task deployToNewJboss(type:Exec) {
   commandLine "/bin/bash", "-c", 'aws ec2 run-instances --image-id ami-687b4f2d --key-name ' + sshKeyName + ' --security-groups ' + securityGroups + ' --user-data `curl -s https://gist.github.com/chtz/7301111/raw/12fc66ddd14d5c60817a6aae6e23d3e10c760068/jboss_dev_env_cloudinit.sh | sed "s/chtzee6templatewardeploy/' + warDeployBucketName + '/g" | sed "s/us-west-1/' + warDeployBucketRegion + '/g" | sed "s/jbosstemplateenv1/' + jbossEnvironmentTagValue + '/g" | base64` --instance-type m1.small --iam-instance-profile ' + iamInstanceProfile + ' --count 1'
 }
 
-task listRunningJbossDns(type:Exec) { 
-  commandLine "/bin/bash", "-c", 'aws ec2 describe-instances --filters Name=instance-state-name,Values=running --filters Name=tag:environment,Values=demoStack1 --query "Reservations[*].Instances[*].PublicDnsName" --output text'
-}
-
 task deployToExistingJbosses(type:Exec) { 
   commandLine "/bin/bash", "-c", './scripts/deploy_to_jbosses.sh build/libs/' + war.archiveName
 }

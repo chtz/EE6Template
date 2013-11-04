@@ -1,5 +1,6 @@
 #!/bin/bash
-DNS_LIST="`aws ec2 describe-instances --filters Name=instance-state-name,Values=running --filters Name=tag:environment,Values=demoStack1 --query "Reservations[*].Instances[*].PublicDnsName" --output text`"
+SCRIPT_DIR=`dirname $0`
+DNS_LIST=`$SCRIPT_DIR/list_running_jbosses_dns.sh`
 for DNS in ${DNS_LIST//\\n/ }
 do
 	scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $1 ec2-user@$DNS:~/
