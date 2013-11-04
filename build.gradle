@@ -65,5 +65,9 @@ task deployToNewJboss(type:Exec) {
 }
 
 task deployToExistingJbosses(type:Exec) { 
-  commandLine "/bin/bash", "-c", './scripts/deploy_to_jbosses.sh build/libs/' + war.archiveName
+  commandLine "/bin/bash", "-c", './scripts/deploy_to_jbosses.sh build/libs/' + jbossEnvironmentTagValue + ' ' + war.archiveName
+}
+
+task killallExistingJbosses(type:Exec) { 
+  commandLine "/bin/bash", "-c", './scripts/killall_jbosses.sh ' + jbossEnvironmentTagValue
 }
