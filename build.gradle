@@ -19,4 +19,47 @@ dependencies {
   testCompile group: 'junit', name: 'junit', version: '4.+'
   providedCompile group: 'javax', name: 'javaee-api', version: '6.0'
   providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
+  //compile 'com.amazonaws:aws-java-sdk:1.6.4'
+}
+
+task(hello) << {
+    println war.archiveName
+}
+
+/**
+ * Pre-Conditions for all AWS tasks:
+ * - Only tested with OSX (/bin/bash required)
+ * - AWS CLI installed and in path (http://aws.amazon.com/cli/)
+ * - AWS credentials configured (~/.aws/config)
+ */
+
+/**
+ * Creates deployment bucket (WAR -> deployment bucket -> JBoss on EC2) 
+ */
+task s3createBucket(type:Exec) {  
+  commandLine "aws", "s3api", "create-bucket", "--bucket", warDeployBucketName, "--create-bucket-configuration", warDeployBucketConfig
+}
+
+/**
+ * Uploads WAR to deployment bucket
+ *
+ * Pre-Conditions: 
+ * - bucket already created
+ * - gradle war executed
+ */
+task s3uploadWar(type:Exec) {  
+  commandLine "aws", "s3", "cp", "./build/libs/" + war.archiveName, "s3://" + warDeployBucketName + "/ROOT.war"
+}
+
+/**
+ * Creates a new EC2 instance, installs JBoss + Apache Proxy, deploys WAR from S3 deployment bucket
+ *
+ * Pre-Conditions:
+ * - WAR uploaded to deployment bucket
+ * - EC2 SSH key generated and configured
+ * - IAM instance role created and configured (at least S3 deployment bucket download permissions)
+ * - Security Group created and configured (at least port 80 is open)
+ */
+task deployToNewJboss(type:Exec) { 
+  commandLine "/bin/bash", "-c", 'aws ec2 run-instances --image-id ami-687b4f2d --key-name ' + sshKeyName + ' --security-groups ' + securityGroups + ' --user-data `curl -s https://gist.github.com/chtz/7301111/raw/b74b142d7e369ad348622f662a661041b25ffbf4/jboss_dev_env_cloudinit.sh | sed "s/chtzee6templatewardeploy/' + warDeployBucketName + '/g" | sed "s/us-west-1/' + warDeployBucketRegion + '/g" | base64` --instance-type m1.small --iam-instance-profile ' + iamInstanceProfile + ' --count 1'
 }

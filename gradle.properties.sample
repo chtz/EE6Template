@@ -1,0 +1,6 @@
+warDeployBucketName=<S3 BUCKET NAME>
+warDeployBucketRegion=us-west-1
+warDeployBucketConfig={"LocationConstraint": "us-west-1"}
+sshKeyName=<EC2 SSH KEY NAME>
+securityGroups=<EC2 SECURITY GROUP NAME>
+iamInstanceProfile=Arn=arn:aws:iam::<AWS ACCOUNT NUMBER>:instance-profile/<AWS IAM INSTANCE ROLE NAME>
